@@ -156,7 +156,7 @@ fi
 
 read -e -p "If you need get some callback over web enter URL: " web_callback_url
 
-if [ "$web_callback_url" = "" ]; then
+if [ -n "$web_callback_url" ]; then
     echo "After completing each backuping you will receive connection on this url: $web_callback_url&server_name=$BACKUP_SERVER_NAME&host_name=$BACKUP_HOST_NAME&host_id=$BACKUP_SERVER_ID"
 fi
 

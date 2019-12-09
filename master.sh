@@ -25,13 +25,13 @@ fi
 SSH_PARAMS="ssh -p $SSH_PORT -i $SSH_KEY -o ConnectTimeout=30"
 
 BACKUP_EXCLUDE_COMPILED=""
-if [ ! -z "$BACKUP_EXCLUDE" ]
+if [ -n "$BACKUP_EXCLUDE" ]
 then
     BACKUP_EXCLUDE_COMPILED="--exclude ${BACKUP_EXCLUDE//,/ --exclude }"
 fi
 
 STATUS=false
-MODE="first_adress"
+MODE="first_address"
 
 echo "Synchronizing data using the first address $SSH_ADDRESS_FIRST"
 /usr/bin/rsync -azq -e "$SSH_PARAMS"  --delete $SSH_USER@$SSH_ADDRESS_FIRST:$BACKUP_SOURCE $BACKUP_TARGET $BACKUP_EXCLUDE_COMPILED
@@ -46,7 +46,7 @@ else
     if [ "$?" -eq "0" ]
     then
         echo "done"
-        MODE="second_adress"
+        MODE="second_address"
         STATUS=true
     else
         echo "fail"
@@ -70,6 +70,6 @@ echo "file_filecount $BACKUP_FILECOUNT"
 echo "file_dircount $BACKUP_DIRCOUNT"
 echo "available_space $AVAILABLE_SPACE"
 
-if [ "$CALLBACK_URL_SUB" = "" ]; then
+if [ -n "$CALLBACK_URL_SUB" ]; then
   RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE"`"
 fi
