@@ -53,23 +53,33 @@ else
     fi
 fi
 
-if $STATUS ; then
-    ARCHIVE_FILE=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S).tgz
-    /bin/tar cfz $ARCHIVE_FILE $BACKUP_TARGET
-    BACKUP_FILESIZE=$(stat -c%s "$ARCHIVE_FILE")
+if [ $STATUS ] ; then
+
+    if [ $BACKUP_NEED_COMPRESSION ]; then
+      ARCHIVE_FILE=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S).tgz
+      /bin/tar cfz $ARCHIVE_FILE $BACKUP_TARGET
+      BACKUP_FILESIZE=$(stat -c%s "$ARCHIVE_FILE")
+    else
+      ARCHIVE_DIR=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S)
+      /bin/cp ARCHIVE_DIR $BACKUP_TARGET
+      BACKUP_FILESIZE=$(/usr/bin/du -sB 1 ARCHIVE_DIR | cut -f1)
+    fi
+
     BACKUP_FILECOUNT=$(find $BACKUP_TARGET -type f | /usr/bin/wc -l)
     BACKUP_DIRCOUNT=$(find $BACKUP_TARGET -type d | /usr/bin/wc -l)
     #DELETING old archives
-    /usr/bin/find $BACKUP_ARCHIVE* -mtime +$BACKUP_ARCHIVE_LIFEDAY -exec /bin/rm {} \;
+    /usr/bin/find $BACKUP_ARCHIVE* -maxdepth 1 -mtime +$BACKUP_ARCHIVE_LIFEDAY -exec /bin/rm -r {} \;
 fi
 
 AVAILABLE_SPACE=$(/bin/df -k / | /bin/grep / | /usr/bin/awk '{print $4}' | /bin/sed '{s/.$//;}')
 
 echo "file_size $BACKUP_FILESIZE"
-echo "file_filecount $BACKUP_FILECOUNT"
-echo "file_dircount $BACKUP_DIRCOUNT"
+echo "file_file_count $BACKUP_FILECOUNT"
+echo "file_dir_count $BACKUP_DIRCOUNT"
 echo "available_space $AVAILABLE_SPACE"
 
 if [ -n "$CALLBACK_URL_SUB" ]; then
   RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE"`"
 fi
+
+exit 0

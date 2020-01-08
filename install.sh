@@ -14,6 +14,8 @@ backup_source=''
 backup_exclude=''
 backup_name=''
 
+backup_need_compression=''
+
 web_callback_url=''
 
 hostname=$(</etc/hostname)
@@ -134,6 +136,16 @@ while [ "$backup_name" = "" ]; do
     fi
 done
 
+while [ "$backup_need_compression" = "" ]; do
+    echo -n "Compress this backup? (y/n): "
+    read -e choice
+    case "$choice" in
+      y|Y|д|Д ) backup_need_compression="y";;
+      n|N|н|Н ) backup_need_compression="n";;
+      * ) backup_need_compression="";;
+    esac
+done
+
 server_id=$( echo "$server_name" | md5sum | /usr/bin/awk '{print $1}')
 
 while [ "$backup_source" = "" ]; do
@@ -180,6 +192,7 @@ BACKUP_SOURCE="$backup_source"
 BACKUP_TARGET="$backup_target"
 BACKUP_ARCHIVE="$backup_archive/$ssh_address_first-$backup_name-"
 BACKUP_EXCLUDE="$backup_exclude"
+BACKUP_NEED_COMPRESSION="$backup_need_compression"
 BACKUP_ARCHIVE_LIFEDAY=30
 BACKUP_FILESIZE=0
 BACKUP_FILECOUNT=0
@@ -198,3 +211,5 @@ echo "For create archive just run this command: $MASTER_FILE"
 echo "Also you can add string like that to you crontab: "
 echo "0 3     * * *   $USER   $MASTER_FILE"
 echo "! You can't use the root user for run this script"
+
+exit 0
