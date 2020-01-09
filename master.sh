@@ -55,20 +55,20 @@ fi
 
 if [ $STATUS ] ; then
 
-    if [ $BACKUP_NEED_COMPRESSION ]; then
+    if [ "$BACKUP_NEED_COMPRESSION" == 'y' ]; then
       ARCHIVE_FILE=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S).tgz
-      /bin/tar cfz $ARCHIVE_FILE $BACKUP_TARGET
+      /bin/tar cfz "$ARCHIVE_FILE" "$BACKUP_TARGET"
       BACKUP_FILESIZE=$(stat -c%s "$ARCHIVE_FILE")
     else
       ARCHIVE_DIR=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S)
-      /bin/cp ARCHIVE_DIR $BACKUP_TARGET
-      BACKUP_FILESIZE=$(/usr/bin/du -sB 1 ARCHIVE_DIR | cut -f1)
+      /bin/cp -r "$BACKUP_TARGET" "$ARCHIVE_DIR"
+      BACKUP_FILESIZE=$(/usr/bin/du -sB 1 "$ARCHIVE_DIR" | cut -f1)
     fi
 
-    BACKUP_FILECOUNT=$(find $BACKUP_TARGET -type f | /usr/bin/wc -l)
-    BACKUP_DIRCOUNT=$(find $BACKUP_TARGET -type d | /usr/bin/wc -l)
+    BACKUP_FILECOUNT=$(find "$BACKUP_TARGET" -type f | /usr/bin/wc -l)
+    BACKUP_DIRCOUNT=$(find "$BACKUP_TARGET" -type d | /usr/bin/wc -l)
     #DELETING old archives
-    /usr/bin/find $BACKUP_ARCHIVE* -maxdepth 1 -mtime +$BACKUP_ARCHIVE_LIFEDAY -exec /bin/rm -r {} \;
+    /usr/bin/find "$BACKUP_ARCHIVE"* -maxdepth 1 -mtime +"$BACKUP_ARCHIVE_LIFEDAY" -exec /bin/rm -r {} \;
 fi
 
 AVAILABLE_SPACE=$(/bin/df -k / | /bin/grep / | /usr/bin/awk '{print $4}' | /bin/sed '{s/.$//;}')
