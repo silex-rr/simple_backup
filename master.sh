@@ -74,6 +74,8 @@ fi
 
 AVAILABLE_SPACE=$(/bin/df -k / | /bin/grep / | /usr/bin/awk '{print $4}' | /bin/sed '{s/.$//;}')
 
+let "AVAILABLE_SPACE = AVAILABLE_SPACE * 1024"
+
 echo "file_size $BACKUP_FILESIZE"
 echo "file_file_count $BACKUP_FILECOUNT"
 echo "file_dir_count $BACKUP_DIRCOUNT"
