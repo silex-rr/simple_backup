@@ -149,11 +149,11 @@ done
 server_id=$( echo "$server_name" | md5sum | /usr/bin/awk '{print $1}')
 
 while [ "$backup_source" = "" ]; do
-    echo -n "Enter path to the directory which you wanna get from the server - $ssh_address_first: "
+    echo -n "Enter path to the directory which you want to get from the server - $ssh_address_first: "
     read -e backup_source
 done
 
-read -e -p "Enter the directories which you wanna exclude from your backup (just use comma, like 'upload/videos,logs,system/backups'): " backup_exclude
+read -e -p "Enter the directories which you want to exclude from your backup (just use comma, like 'upload/videos,logs,system/backups'): " backup_exclude
 
 
 backup_target="$directory/last/"
@@ -169,7 +169,7 @@ fi
 read -e -p "If you need get some callback over web enter URL: " web_callback_url
 
 if [ -n "$web_callback_url" ]; then
-    echo "After completing each backuping you will receive connection on this url: $web_callback_url&server_name=$BACKUP_SERVER_NAME&host_name=$BACKUP_HOST_NAME&host_id=$BACKUP_SERVER_ID"
+    echo "When backup is complete, you will receive a connection at this URL: $web_callback_url&server_name=$BACKUP_SERVER_NAME&host_name=$BACKUP_HOST_NAME&host_id=$BACKUP_SERVER_ID"
 fi
 
 CONFIG_FILE="$directory/master.cfg"
@@ -208,8 +208,7 @@ echo "---------------------"
 echo "install successfully completed"
 echo "---------------------"
 echo "For create archive just run this command: $MASTER_FILE"
-echo "Also you can add string like that to you crontab: "
+echo "Also you can add this string to you crontab: "
 echo "0 3     * * *   $USER   $MASTER_FILE"
-echo "! You can't use the root user for run this script"
 
 exit 0

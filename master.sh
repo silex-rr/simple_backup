@@ -4,10 +4,10 @@ my_dir="$(dirname "$0")"
 
 . "$my_dir/master.cfg"
 
-if [ "$EUID" -eq 0 ]
-  then echo "Please run this script as a non-root user"
-  exit
-fi
+#if [ "$EUID" -eq 0 ]
+#  then echo "Please run this script as a non-root user"
+#  exit
+#fi
 
 CALLBACK_URL=""
 
@@ -65,6 +65,7 @@ if [ $STATUS ] ; then
       BACKUP_FILESIZE=$(/usr/bin/du -sB 1 "$ARCHIVE_DIR" | cut -f1)
     fi
 
+    BACKUP_LAST_CHANGE=$(find ./ -maxdepth 1 -exec stat \{} -c %Z \; |  sort -n -r |  head -n 1)
     BACKUP_FILECOUNT=$(find "$BACKUP_TARGET" -type f | /usr/bin/wc -l)
     BACKUP_DIRCOUNT=$(find "$BACKUP_TARGET" -type d | /usr/bin/wc -l)
     #DELETING old archives
@@ -77,9 +78,10 @@ echo "file_size $BACKUP_FILESIZE"
 echo "file_file_count $BACKUP_FILECOUNT"
 echo "file_dir_count $BACKUP_DIRCOUNT"
 echo "available_space $AVAILABLE_SPACE"
+echo "last_change $BACKUP_LAST_CHANGE"
 
 if [ -n "$CALLBACK_URL_SUB" ]; then
-  RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE"`"
+  RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE&last_change=$BACKUP_LAST_CHANGE"`"
 fi
 
 exit 0
