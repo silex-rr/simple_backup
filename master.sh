@@ -72,7 +72,7 @@ if [ $STATUS ] ; then
     /usr/bin/find "$BACKUP_ARCHIVE"* -maxdepth 1 -mtime +"$BACKUP_ARCHIVE_LIFEDAY" -exec /bin/rm -r {} \;
 fi
 
-AVAILABLE_SPACE=$(/bin/df -k / | /bin/grep / | /usr/bin/awk '{print $4}' | /bin/sed '{s/.$//;}')
+AVAILABLE_SPACE=$(/bin/df -kT $BACKUP_TARGET | /bin/grep / | /usr/bin/awk '{print $5}' )
 
 let "AVAILABLE_SPACE = AVAILABLE_SPACE * 1024"
 
