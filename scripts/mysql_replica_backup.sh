@@ -49,14 +49,14 @@ else
 fi
 #/bin/bzip2 "$sql_file"
 time=$(date +%Y-%m-%d_%H:%M:%S)
-echo "$time backup complited"
+echo "$time backup was created"
 
 
 if [ -n "$BACKUP_SERVER" ]; then
-  echo "$time load data to backup server"
+  echo "$time data is sending to backup server"
   RESULT="`/usr/bin/wget -qO- "$BACKUP_SERVER"`"
   time=$(date +%Y-%m-%d_%H:%M:%S)
-  echo "$time data loaded succsesful"
+  echo "$time data was loaded"
   /bin/rm "$sql_file.bz2";
   /bin/rm "$log_file";
 fi
