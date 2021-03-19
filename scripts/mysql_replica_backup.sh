@@ -6,7 +6,7 @@ curdate=$(date +%Y-%m-%d_%H:%M:%S)
 
 LOCAL_BACKUP_STORAGE=""
 MYSQL_DATABASE=""
-MYSQL_IGNORE_TABLE=() #fill in like (table1 table2 table3)
+MYSQL_IGNORE_TABLE=() #fill it like (table1 table2 table3)
 MYSQL_USER=""
 MYSQL_PASS=""
 MYSQL_HOST=""
