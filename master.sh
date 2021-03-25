@@ -53,16 +53,20 @@ else
     fi
 fi
 
+BACKUP_LOCATION=''
+
 if [ $STATUS ] ; then
 
     if [ "$BACKUP_NEED_COMPRESSION" == 'y' ]; then
       ARCHIVE_FILE=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S).tgz
       /bin/tar cfz "$ARCHIVE_FILE" "$BACKUP_TARGET"
       BACKUP_FILESIZE=$(stat -c%s "$ARCHIVE_FILE")
+      BACKUP_LOCATION=$ARCHIVE_FILE
     else
       ARCHIVE_DIR=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S)
       /bin/cp -r "$BACKUP_TARGET" "$ARCHIVE_DIR"
       BACKUP_FILESIZE=$(/usr/bin/du -sB 1 "$ARCHIVE_DIR" | cut -f1)
+      BACKUP_LOCATION=$ARCHIVE_DIR
     fi
 
     BACKUP_LAST_CHANGE=$(find "$BACKUP_TARGET" -maxdepth 1 -exec stat \{} -c %Z \; |  sort -n -r |  head -n 1)
@@ -81,9 +85,10 @@ echo "file_file_count $BACKUP_FILECOUNT"
 echo "file_dir_count $BACKUP_DIRCOUNT"
 echo "available_space $AVAILABLE_SPACE"
 echo "last_change $BACKUP_LAST_CHANGE"
+echo "backup_location $BACKUP_LOCATION"
 
 if [ -n "$CALLBACK_URL_SUB" ]; then
-  RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE&last_change=$BACKUP_LAST_CHANGE"`"
+  RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE&last_change=$BACKUP_LAST_CHANGE&backup_location=$BACKUP_LOCATION"`"
 fi
 
 exit 0
