@@ -12,7 +12,8 @@ MYSQL_PASS=""
 MYSQL_HOST=""
 MYSQL_PORT=""
 
-BACKUP_SERVER=""
+#url of http trigger
+BACKUP_SERVERS=() #fill it like (http://10.10.0.150/backup_activate http://10.10.0.151/backup_activate)
 
 ###/CONFIG###
 
@@ -51,15 +52,15 @@ fi
 time=$(date +%Y-%m-%d_%H:%M:%S)
 echo "$time backup was created"
 
-
-if [ -n "$BACKUP_SERVER" ]; then
-  echo "$time data is sending to backup server"
+for BACKUP_SERVER in ${BACKUP_SERVERS[*]}
+do
+  echo "$time data is sending to backup server: $BACKUP_SERVER"
   RESULT="`/usr/bin/wget -qO- "$BACKUP_SERVER"`"
   time=$(date +%Y-%m-%d_%H:%M:%S)
   echo "$time data was loaded"
-  /bin/rm "$sql_file.bz2";
-  /bin/rm "$log_file";
-fi
+done
 
+/bin/rm "$sql_file.bz2";
+/bin/rm "$log_file";
 
 exit 0

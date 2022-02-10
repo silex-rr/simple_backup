@@ -117,6 +117,9 @@ else
         if [ "$?" -eq "0" ]; then
             done="y"
             echo "SSH key successfully added to the server - $ssh_address_first"
+            if "$ssh_address_second" -ne ''; then
+                ssh -p $ssh_port -i $SSH_KEY_FILE  $ssh_user@$ssh_address_second "uptime"  > /dev/null
+            fi
         else
             echo "Cannot add this SSH key to the server - $ssh_address_first"
         fi
@@ -207,8 +210,8 @@ EOF1
 echo "---------------------"
 echo "install successfully completed"
 echo "---------------------"
-echo "For create archive just run this command: $MASTER_FILE"
-echo "Also you can add this string to you crontab: "
+echo "To create an archive just run this command: $MASTER_FILE"
+echo "Also you can add this string to your crontab: "
 echo "0 3     * * *   $USER   $MASTER_FILE"
 
 exit 0
