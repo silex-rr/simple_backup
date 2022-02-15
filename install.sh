@@ -116,8 +116,8 @@ else
         /usr/bin/ssh-copy-id -p $ssh_port -i $SSH_KEY_FILE $ssh_user@$ssh_address_first
         if [ "$?" -eq "0" ]; then
             done="y"
-            echo "SSH key successfully added to the server - $ssh_address_first"
-            if "$ssh_address_second" -ne ''; then
+            echo "SSH key successfully added to the server - $ssh_address_first";
+            if [ -n "$ssh_address_second" ] ; then
                 ssh -p $ssh_port -i $SSH_KEY_FILE  $ssh_user@$ssh_address_second "uptime"  > /dev/null
             fi
         else
