@@ -55,7 +55,7 @@ echo "$time backup was created"
 
 for BACKUP_SERVER in ${BACKUP_HTTP_SERVERS[*]}
 do
-  echo "$time data is sending to backup server: $BACKUP_SERVER"
+  echo "$time data is sending by HTTP to backup server: $BACKUP_SERVER"
   RESULT="`/usr/bin/wget -qO- "$BACKUP_SERVER"`"
   time=$(date +%Y-%m-%d_%H:%M:%S)
   echo "$time data was loaded"

@@ -69,7 +69,7 @@ if [ $STATUS ] ; then
       BACKUP_LOCATION=$ARCHIVE_DIR
     fi
 
-    BACKUP_LAST_CHANGE=$(find "$BACKUP_TARGET" -maxdepth 1 -exec stat \{} -c %Z \; |  sort -n -r |  head -n 1)
+    BACKUP_LAST_CHANGE=$(find "$BACKUP_TARGET" -maxdepth 10 -type d -exec stat \{} -c %Z \; |  sort -n -r |  head -n 1)
     BACKUP_FILECOUNT=$(find "$BACKUP_TARGET" -type f | /usr/bin/wc -l)
     BACKUP_DIRCOUNT=$(find "$BACKUP_TARGET" -type d | /usr/bin/wc -l)
     #DELETING old archives
