@@ -58,12 +58,12 @@ BACKUP_LOCATION=''
 if [ $STATUS ] ; then
 
     if [ "$BACKUP_NEED_COMPRESSION" == 'y' ]; then
-      ARCHIVE_FILE=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S).tgz
+      ARCHIVE_FILE=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H_%M_%S).tgz
       /bin/tar cfz "$ARCHIVE_FILE" "$BACKUP_TARGET"
       BACKUP_FILESIZE=$(stat -c%s "$ARCHIVE_FILE")
       BACKUP_LOCATION=$ARCHIVE_FILE
     else
-      ARCHIVE_DIR=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H:%M:%S)
+      ARCHIVE_DIR=$BACKUP_ARCHIVE$(date +%Y-%m-%d_%H_%M_%S)
       /bin/cp -r "$BACKUP_TARGET" "$ARCHIVE_DIR"
       BACKUP_FILESIZE=$(/usr/bin/du -sB 1 "$ARCHIVE_DIR" | cut -f1)
       BACKUP_LOCATION=$ARCHIVE_DIR
