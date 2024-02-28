@@ -1,7 +1,4 @@
 #!/bin/bash
-
-curdate=$(date +%Y-%m-%d_%H:%M:%S)
-
 ###CONFIG###
 
 LOCAL_BACKUP_STORAGE=""
@@ -18,6 +15,8 @@ BACKUP_HTTP_SERVERS=() #fill it like (http://10.10.0.150/backup_activate http://
 BACKUP_SSH_SERVERS=() #fill it like ("user:/usr/backup/keys/ssh_key:10.10.0.150:22:/remote_server_backup_script.sh") #user:ssh_key_path:address:port
 
 ###/CONFIG###
+
+curdate=$(date +%Y-%m-%d_%H:%M:%S)
 
 compression_1="/usr/bin/lbzip2"
 compression_2="/bin/bzip2"
