@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curdate=$(date +%Y-%m-%d_%H:%M:%S)
+curdate=$(date +%Y-%m-%d_%H-%M-%S)
 
 ###CONFIG###
 
@@ -11,6 +11,7 @@ MYSQL_USER=""
 MYSQL_PASS=""
 MYSQL_HOST=""
 MYSQL_PORT=""
+MYSQL_STRUCTURE_DUMP=false
 
 #url of http trigger
 BACKUP_HTTP_SERVERS=() #fill it like (http://10.10.0.150/backup_activate http://10.10.0.151/backup_activate)
@@ -21,6 +22,7 @@ compression_1="/usr/bin/lbzip2"
 compression_2="/bin/bzip2"
 
 sql_file="$LOCAL_BACKUP_STORAGE/mysql_$curdate.sql"
+sql_structure_file="$LOCAL_BACKUP_STORAGE/mysql_structure_$curdate.sql"
 
 ignore_table=""
 for table in ${MYSQL_IGNORE_TABLE[*]}
@@ -29,6 +31,15 @@ do
 done
 
 time=$(date +%Y-%m-%d_%H:%M:%S)
+
+if [ $MYSQL_STRUCTURE_DUMP ] ; then
+  echo "$time starting the database structure backup"
+  /usr/bin/mysqldump --no-data -u"$MYSQL_USER" -p"$MYSQL_PASS" -h "$MYSQL_HOST" -P "$MYSQL_PORT" \
+   "$MYSQL_DATABASE" > "$sql_structure_file"
+  time=$(date +%Y-%m-%d_%H:%M:%S)
+  echo "$time the structure backup completed"
+fi
+
 echo "$time starting the database backup"
 /usr/bin/mysqldump --single-transaction -u"$MYSQL_USER" -p"$MYSQL_PASS" -h "$MYSQL_HOST" -P "$MYSQL_PORT" \
  "$MYSQL_DATABASE" $ignore_table > "$sql_file"
