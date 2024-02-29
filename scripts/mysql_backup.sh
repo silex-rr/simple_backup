@@ -85,5 +85,8 @@ do
 done
 
 /bin/rm "$sql_file.bz2";
+if [ $MYSQL_STRUCTURE_DUMP ] ; then
+  /bin/rm "$sql_structure_file";
+fi
 
 exit 0
