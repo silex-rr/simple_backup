@@ -30,6 +30,15 @@ for table in ${MYSQL_IGNORE_TABLE[*]}
 do
     ignore_table+=" --ignore-table=$MYSQL_DATABASE.$table"
 done
+
+time=$(date +%Y-%m-%d_%H:%M:%S)
+echo "$time cleaning the backup storage directory"
+for file in "$LOCAL_BACKUP_STORAGE"/*
+do
+  echo "Deleting $file"
+  rm -rf "$file"
+done
+
 echo "$curdate stopping the slave"
 /usr/bin/mysql -u"$MYSQL_USER" -p"$MYSQL_PASS" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -e "STOP SLAVE\G"
 /usr/bin/mysql -u"$MYSQL_USER" -p"$MYSQL_PASS" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -e "SHOW SLAVE STATUS\G" > "$log_file"

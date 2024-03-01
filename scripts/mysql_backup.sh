@@ -32,6 +32,15 @@ done
 
 time=$(date +%Y-%m-%d_%H:%M:%S)
 
+echo "$time cleaning the backup storage directory"
+for file in "$LOCAL_BACKUP_STORAGE"/*
+do
+  echo "Deleting $file"
+  rm -rf "$file"
+done
+
+time=$(date +%Y-%m-%d_%H:%M:%S)
+
 if [ $MYSQL_STRUCTURE_DUMP ] ; then
   echo "$time starting the database structure backup"
   /usr/bin/mysqldump --no-data -u"$MYSQL_USER" -p"$MYSQL_PASS" -h "$MYSQL_HOST" -P "$MYSQL_PORT" \
