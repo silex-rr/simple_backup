@@ -4,11 +4,6 @@ my_dir="$(dirname "$0")"
 
 . "$my_dir/master.cfg"
 
-#if [ "$EUID" -eq 0 ]
-#  then echo "Please run this script as a non-root user"
-#  exit
-#fi
-
 CALLBACK_URL=""
 
 if [ ! -z "$WEB_CALLBACK_URL" ]
