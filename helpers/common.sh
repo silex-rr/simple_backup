@@ -7,11 +7,11 @@ get_user_confirmation() {
     local choice=''
 
     while [ "$choice" = "" ]; do
-        echo -n "$prompt (y/n): "
+        echo -n "$prompt (y/n): " >&2
         read -r -e choice
         case "${choice,,}" in
-            y|yes ) return ${EXIT_FAILURE};;
-            n|no  ) return ${EXIT_SUCCESS};;
+            y|yes ) return ${EXIT_SUCCESS};;
+            n|no  ) return ${EXIT_FAILURE};;
             *     ) choice='';;
         esac
     done
@@ -20,17 +20,18 @@ get_user_confirmation() {
 # Creates directory if it doesn't exist
 create_directory() {
     local dir=$1
+    echo "Attempt to create a dir: $dir" >&2
 
     if [ -d "$KEY_STORE" ]; then
-      echo "Directory already exists: $dir"
+      echo "Directory already exists: $dir" >&2
       return ${EXIT_SUCCESS}
     fi
 
     if /bin/mkdir -p "$dir"; then
-        echo "Directory successfully created: $dir"
+        echo "Directory successfully created: $dir" >&2
         return ${EXIT_SUCCESS}
     else
-        echo "Error, cannot create this directory: $dir"
+        echo "Error, cannot create this directory: $dir" >&2
         return ${EXIT_FAILURE}
     fi
 }
@@ -43,9 +44,7 @@ setup_backup_directory() {
         read -r -e directory
 
         if [ -n "$directory" ]; then
-            # Check if the directory already exists
             if [ -d "$directory" ]; then
-                # Check if the directory contains files
                 files=("$directory"/*)
                 if [ ${#files[@]} -gt 0 ]; then
                     if ! get_user_confirmation "Directory already exists and contains files, continue?" >&2; then
@@ -54,13 +53,14 @@ setup_backup_directory() {
                     fi
                 fi
             else
-                # Ask to create the directory if it doesn't exist
                 if get_user_confirmation "Directory does not exist, create?" >&2; then
+                    ehco 'asd' >&2
                     if ! create_directory "$directory" >&2; then
                         echo "Failed to create directory: $directory" >&2
                         directory=''
                     fi
                 else
+                    echo 'Directory creating is declined' >&2
                     directory=''
                 fi
             fi

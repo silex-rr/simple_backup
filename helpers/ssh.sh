@@ -29,11 +29,12 @@ execute_ssh_command() {
             -p "${ssh_port}" \
             -l "${ssh_user}" \
             -i "${ssh_key_file}" \
-            "${host}" "${command}"; then
+            "${host}" "${command}" > /dev/null; then
         echo "SSH command execution failed" >&2
         return ${EXIT_FAILURE}
     fi
 
+  return ${EXIT_SUCCESS}
 }
 
 # Test SSH connection

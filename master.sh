@@ -1,4 +1,6 @@
 #!/bin/bash
+readonly EXIT_SUCCESS=0
+readonly EXIT_FAILURE=1
 
 my_dir="$(dirname "$0")"
 
@@ -6,7 +8,16 @@ my_dir="$(dirname "$0")"
 
 CALLBACK_URL=""
 
-if [ ! -z "$WEB_CALLBACK_URL" ]
+if ! command -v /usr/bin/rsync >/dev/null 2>&1; then
+    echo "Error: rsync command not found" >&2
+    return ${EXIT_FAILURE}
+fi
+if ! command -v /usr/bin/wget >/dev/null 2>&1; then
+    echo "Error: wget command not found" >&2
+    return ${EXIT_FAILURE}
+fi
+
+if [ -n "$WEB_CALLBACK_URL" ]
 then
   CALLBACK_URL_SUB=""
   if [[ "$WEB_CALLBACK_URL" == *"?"* ]]; then
@@ -29,16 +40,16 @@ STATUS=false
 MODE="first_address"
 
 echo "Synchronizing data using the first address $SSH_ADDRESS_FIRST"
-/usr/bin/rsync -azq -e "$SSH_PARAMS"  --delete $SSH_USER@$SSH_ADDRESS_FIRST:$BACKUP_SOURCE $BACKUP_TARGET $BACKUP_EXCLUDE_COMPILED
-if [ "$?" -eq "0" ]
-then
+
+if /usr/bin/rsync -azq -e "$SSH_PARAMS" --delete "$SSH_USER@$SSH_ADDRESS_FIRST:$BACKUP_SOURCE" "$BACKUP_TARGET" $BACKUP_EXCLUDE_COMPILED;
+ then
 	echo "done"
     STATUS=true
 else
 	echo "fail"
+	if [ -z "$SSH_ADDRESS_SECOND" ]; then
     echo "Synchronizing data using the second address $SSH_ADDRESS_SECOND"
-    /usr/bin/rsync -azq -e "$SSH_PARAMS"  --delete $SSH_USER@$SSH_ADDRESS_SECOND:$BACKUP_SOURCE $BACKUP_TARGET $BACKUP_EXCLUDE_COMPILED
-    if [ "$?" -eq "0" ]
+    if /usr/bin/rsync -azq -e "$SSH_PARAMS"  --delete "$SSH_USER@$SSH_ADDRESS_SECOND:$BACKUP_SOURCE" "$BACKUP_TARGET" $BACKUP_EXCLUDE_COMPILED;
     then
         echo "done"
         MODE="second_address"
@@ -46,6 +57,7 @@ else
     else
         echo "fail"
     fi
+  fi
 fi
 
 BACKUP_LOCATION=''
@@ -71,9 +83,9 @@ if [ $STATUS ] ; then
     /usr/bin/find "$BACKUP_ARCHIVE"* -maxdepth 1 -mtime +"$BACKUP_ARCHIVE_LIFEDAY" -exec /bin/rm -r {} \;
 fi
 
-AVAILABLE_SPACE=$(/bin/df -kT $BACKUP_TARGET | /bin/grep / | /usr/bin/awk '{print $5}' )
+AVAILABLE_SPACE=$(/bin/df -kT "$BACKUP_TARGET" | /bin/grep / | /usr/bin/awk '{print $5}' )
 
-let "AVAILABLE_SPACE = AVAILABLE_SPACE * 1024"
+AVAILABLE_SPACE=$((AVAILABLE_SPACE * 1024))
 
 echo "file_size $BACKUP_FILESIZE"
 echo "file_file_count $BACKUP_FILECOUNT"
@@ -83,7 +95,7 @@ echo "last_change $BACKUP_LAST_CHANGE"
 echo "backup_location $BACKUP_LOCATION"
 
 if [ -n "$CALLBACK_URL_SUB" ]; then
-  RESULT="`/usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE&last_change=$BACKUP_LAST_CHANGE&backup_location=$BACKUP_LOCATION"`"
+  /usr/bin/wget -qO- "$CALLBACK_URL&mode=$MODE&file_size=$BACKUP_FILESIZE&file_filecount=$BACKUP_FILECOUNT&file_dircount=$BACKUP_DIRCOUNT&available_space=$AVAILABLE_SPACE&last_change=$BACKUP_LAST_CHANGE&backup_location=$BACKUP_LOCATION&status=$STATUS"
 fi
 
-exit 0
+exit ${EXIT_SUCCESS}

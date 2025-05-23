@@ -31,9 +31,9 @@ source "./helpers/common.sh"
 
 collect_ssh_config() {
     read -r -e -p "SSH address (primary): " ssh_address_primary
-    read -r -e -p "SSH address (secondary): " ssh_address_secondary
-    read -r -e -p "SSH login: " ssh_user
+    read -r -e -p "SSH address (secondary)[optional]: " ssh_address_secondary
     read -r -e -p "SSH port:[$SSH_PORT_DEFAULT] " port_input
+    read -r -e -p "SSH login: " ssh_user
     ssh_port=${port_input:-$SSH_PORT_DEFAULT}
 }
 
@@ -42,15 +42,15 @@ setup_ssh_key() {
     local key_store="$directory/keys"
     local ssh_key_file="$key_store/$SSH_KEY_NAME"
 
-    echo "SSH key generation..."
+    echo "SSH key generation..." >&2
 
-    if ! create_directory "$key_store"; then
-        echo 'Error, cannot create a directory for key storing';
+    if ! create_directory "$key_store" >&2; then
+        echo 'Error, cannot create a directory for key storing' >&2
         return ${EXIT_FAILURE};
     fi
 
-    if ! ssh_gen "$ssh_key_file"; then
-      echo 'Error, cannot able to create SHH keys'
+    if ! ssh_gen "$ssh_key_file" >&2; then
+      echo 'Error, cannot able to create SHH keys' >&2
       return ${EXIT_FAILURE};
     fi
 
@@ -60,13 +60,22 @@ collect_ssh_config
 
 if ! check_ssh_connectivity "$ssh_address_primary" "$ssh_port"; then
   echo "Cannot reach the server: $ssh_address_primary:$ssh_port"
-  exit
+  exit ${EXIT_FAILURE}
 fi
 
 directory=$(setup_backup_directory)
 ssh_key_file=$(setup_ssh_key "$directory")
-if ! $ssh_key_file; then
-  exit
+if [ -z "$ssh_key_file" ]; then
+  echo "Error, omit ssh key file 1"
+
+fi
+
+if [ ! -f "$ssh_key_file" ]; then
+  echo "Error, omit ssh key file 2: $ssh_key_file"
+fi
+if [ -z "$ssh_key_file" ] || [ ! -f "$ssh_key_file" ]; then
+  echo "Error, SSH key file not specified or does not exist"
+  exit ${EXIT_FAILURE}
 fi
 
 echo "SSH key check..."
@@ -74,14 +83,14 @@ echo "SSH key check..."
 if test_ssh_connection "$ssh_address_primary" "$ssh_user" "$ssh_port" "$ssh_key_file"; then
     echo "SSH key already accepted"
 elif add_ssh_key  "$ssh_address_primary" "$ssh_user" "$ssh_port" "$ssh_key_file"; then
-      if execute_ssh_command "${ssh_address_primary}" "${SSH_COMMAND_UPTIME}" > /dev/null; then
+      if execute_ssh_command "${ssh_address_primary}" "${SSH_COMMAND_UPTIME}" "${ssh_user}" "${ssh_port}" "${ssh_key_file}" > /dev/null; then
           echo "Successfully verified connection to the server"
       else
           echo "Failed to verify connection to the server"
-          return ${EXIT_FAILURE}
+          exit ${EXIT_FAILURE}
       fi
       if [ -n "${ssh_address_secondary}" ]; then
-        if execute_ssh_command "${ssh_address_secondary}" "${SSH_COMMAND_UPTIME}" > /dev/null; then
+        if execute_ssh_command "${ssh_address_secondary}" "${SSH_COMMAND_UPTIME}" "${ssh_user}" "${ssh_port}" "${ssh_key_file}" > /dev/null; then
           echo "Successfully verified connection by second address"
         else
           echo "Failed to verify connection by second address"
@@ -95,7 +104,7 @@ fi
 
 echo "Config setup file ..."
 
-read -r -e -p "Name for this server:[$hostname] " server_name
+read -r -e -p "Name for this server [$hostname]: " server_name
 server_name=${server_name:-$hostname}
 
 while [ "$backup_name" = "" ]; do
@@ -106,7 +115,7 @@ while [ "$backup_name" = "" ]; do
     fi
 done
 
-backup_need_compression=get_user_confirmation "Compress this backup?"
+backup_need_compression=$(get_user_confirmation "Compress this backup?")
 
 server_id=$( echo "$server_name" | md5sum | /usr/bin/awk '{print $1}')
 
@@ -140,7 +149,7 @@ cat > "$CONFIG_FILE" <<EOF1
 ROOT_DIR="$directory/"
 
 SSH_PORT="$ssh_port"
-SSH_KEY="$SSH_KEY_FILE"
+SSH_KEY="$ssh_key_file"
 SSH_USER="$ssh_user"
 SSH_ADDRESS_FIRST="$ssh_address_primary"
 SSH_ADDRESS_SECOND="$ssh_address_secondary"
@@ -172,4 +181,4 @@ echo "To create an archive, just run this command: $MASTER_FILE"
 echo "Also you can add this string to your crontab: "
 echo "0 3     * * *   $USER   $MASTER_FILE"
 
-exit 0
+exit ${EXIT_SUCCESS}
