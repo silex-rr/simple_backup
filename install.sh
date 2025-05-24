@@ -179,6 +179,6 @@ echo "install successfully completed"
 echo "---------------------"
 echo "To create an archive, just run this command: $MASTER_FILE"
 echo "Also you can add this string to your crontab: "
-echo "0 3     * * *   $USER   $MASTER_FILE"
+echo "0 3     * * *   $USER   $MASTER_FILE >/dev/null 2>&1"
 
 exit ${EXIT_SUCCESS}

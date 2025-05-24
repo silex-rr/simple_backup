@@ -67,5 +67,9 @@ setup_backup_directory() {
         fi
     done
 
+    if [[ "${directory: -1}" == '/' && ${#directory} -gt 1 ]]; then
+        directory="${directory%/}"
+    fi
+
     echo "$directory"
 }
